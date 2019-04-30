@@ -9,6 +9,12 @@ export default {
          return 6379
          //连接redis
       }
+   },
+   aliOss:{
+      region:'oss-cn-shenzhen',
+      accessKeyId:'LTAIDaT373YHmkTC',
+      accessKeySecret:'ndTGswjQlWA2uz1m4Du3Drd73ULN13',
+      bucket:'mycz'
    }
  
 }

@@ -16,7 +16,7 @@ const foods = new Schema({
    },
    foodsImgList:{
        //数组存放图片路径
-       type:Array,
+       type:String,
        require:true
    }
 })

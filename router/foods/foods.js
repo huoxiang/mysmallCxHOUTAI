@@ -1,5 +1,6 @@
 import Router from 'koa-router'
 import category  from '../../model/foodscategory'
+import foods from '../../model/foods'
 import multer from 'koa-multer'
 const router = new Router({
     prefix:"/foods"
@@ -7,7 +8,6 @@ const router = new Router({
 let storage = multer.diskStorage({
     //文件保存路径
     destination:(req,file,cb) =>{
-         
         console.log(req)
        cb(null,'public/uploads/')
     },
@@ -63,7 +63,21 @@ router.get('/downFoods',async ctx=>{
     //删除的商品一个表
 })
 router.get('/upFoods',async ctx=>{
-    //上架商品
+    //上架商品，先进行测试
+    console.log(ctx.query)
+    let data = await foods.create({
+        foodsName:'肉',
+        foodsPrice:'80',
+        foodsdescribe:'aasfasga',
+        foodsImgList:ctx.query.data
+    })
+    if(data){
+        ctx.body ={
+            code:0,
+            msg:'上传成功'
+        }
+    }
+   
 })
 router.get('/getCategory',async ctx=>{
     //获取分类接口，此处需要进行排列,selectId越大排列越靠前
