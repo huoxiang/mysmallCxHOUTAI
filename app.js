@@ -6,16 +6,16 @@ import Foods from './router/foods/foods'
 import auto from './router/autograph/aut'
 import mongoose from 'mongoose'
 import config from './config/config'
-import session from 'koa-generic-session'
-import Redis from 'koa-redis'
+// import session from 'koa-generic-session'
+// import Redis from 'koa-redis'
 const app = new koa2()
 app.keys=['tg','keys']
 app.proxy=true
-app.use(session({
-    key:'tg',
-    prefix:'mt:uid',
-    store:new Redis()
-}))
+// app.use(session({
+//     key:'tg',
+//     prefix:'mt:uid',
+//     store:new Redis()
+// }))
 app.use(cors({
     origin:ctx=>{
         return "*"//允许所有域名跨域

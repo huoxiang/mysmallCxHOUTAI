@@ -19,8 +19,8 @@ router.post('/login', async ctx => {
    }
   })
   //将用户的openid存入数据库
-  console.log(data.data,'data')
-  Store.hmset(`session_key:${data.data.openid}`,'session_key',data.data.session_key)
+  // console.log(data.data,'data')
+  // Store.hmset(`session_key:${data.data.openid}`,'session_key',data.data.session_key)
   let newUser = await user.create({
     openid:data.data.openid,
     phone:""
@@ -46,7 +46,7 @@ router.post('/login', async ctx => {
 })
 router.post('/setUserInfo',async ctx=>{
      console.log(ctx.request.body)
-     let saveSession_key = await Store.hget(`session_key:${ctx.request.body.openid}`,'session_key')
+    //  let saveSession_key = await Store.hget(`session_key:${ctx.request.body.openid}`,'session_key')
      console.log(saveSession_key,'key')
     ctx.body ={
        code:0,
