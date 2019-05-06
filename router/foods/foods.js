@@ -1,6 +1,7 @@
 import Router from 'koa-router'
 import category from '../../model/foodscategory'
 import foods from '../../model/foods'
+import downfoods from '../../model/downFoods'
 const router = new Router({
     prefix: "/foods"
 })
@@ -8,19 +9,20 @@ router.post('/upload', async ctx => {
     console.log(ctx)
 })
 router.get('/getFoodsList', async ctx => {
-    
     //需要多少条数据，默认不传参数为前十条数据
     let start =parseInt(ctx.query.start) //这边可以改为接收参数后的计算
     let pageSize = 10 //每一页显示的数据条数
     let arr = []
     let arrLength = await foods.find()
     let res = await foods.find().skip(start).limit(pageSize).exec()
+    console.log(res)
         arr = res.map(item => {
             return {
                 number: item.number,
                 foodsName: item.foodsName,
                 foodsPrice: item.foodsPrice,
-                foodsdescribe: item.foodsdescribe
+                foodsdescribe: item.foodsdescribe,
+                id:item.foodsid
             }
         })
     let sa = arrLength.length/10
@@ -53,6 +55,7 @@ router.get('/addCategory', async ctx => {
             cateGoryId: ctx.query.id,
             cateGoryName: ctx.query.name,
             selectId: ctx.query.selectId
+           
         })
         if (res) {
             ctx.body = {
@@ -61,6 +64,27 @@ router.get('/addCategory', async ctx => {
             }
         }
     }
+})
+router.get('/categoryFoods',async ctx=>{
+    //返回所属分类内容的接口，参数为分类id
+    let res = await foods.find({
+        couponSelected:ctx.query.couponSelected
+    })
+   console.log(res)
+   let arr = res.map(item => {
+            return {
+                number: item.number,
+                id:item.foodsid,
+                foodsName: item.foodsName,
+                foodsPrice: item.foodsPrice,
+                foodsdescribe: item.foodsdescribe,
+                id:item.foodsid
+            }
+        })
+   ctx.body={
+       code:0,
+       data:arr
+   }
 })
 router.get('/addFoods', async ctx => {
     //增加商品的接
@@ -76,6 +100,7 @@ router.get('/addFoods', async ctx => {
         return false
     }
     let res = await foods.create({
+        foodsid:ctx.query.foodsid,
         foodsName: ctx.query.foodsName,
         foodsPrice: ctx.query.price,
         foodsdescribe: ctx.query.Specifications,
@@ -103,33 +128,111 @@ router.get('/getFoodsDetail', async ctx => {
 })
 router.get('/searchFoods',async ctx=>{
     //搜索商品,应该是模糊查询,后期在考虑模糊查询
-    console.log(ctx.query)
+    let key = ctx.query.keyWord
+    let search = new RegExp(key)
+    let data = await foods.find({
+        foodsName:search
+    })
+   let arr =data.map(item => {
+        return {
+            number: item.number,
+            foodsName: item.foodsName,
+            foodsPrice: item.foodsPrice,
+            foodsdescribe: item.foodsdescribe,
+            id:item.foodsid
+        }
+    })
     ctx.body = {
         code:0,
-        msg:ctx.query.name
+        data:arr
     }
-
-
 })
-router.get('/downFoods', async ctx => {
+router.post('/downFoods', async ctx => {
     //下架商品,
     //上架商品一个表，下架商品一个表
     //删除的商品一个表
-})
-router.get('/upFoods', async ctx => {
-    //上架商品，先进行测试
-    console.log(ctx.query)
-    let data = await foods.create({
-        foodsName: '肉',
-        foodsPrice: '80',
-        foodsdescribe: 'aasfasga',
-        foodsImgList: ctx.query.data
+    console.log(ctx.request.body.data.id)
+    let data = await foods.find({
+        foodsid:ctx.request.body.data.id
     })
-    if (data) {
-        ctx.body = {
-            code: 0,
-            msg: '上传成功'
-        }
+    console.log(data)
+    let downRes = await downfoods.create({
+        foodsid:data[0].foodsid,
+        foodsName: data[0].foodsName,
+        foodsPrice: data[0].foodsPrice,
+        foodsdescribe: data[0].foodsdescribe,
+        oldPrice: data[0].oldPrice,
+        foodsImgList: data[0].foodsImgList,
+        couponSelected: data[0].couponSelected,
+        number: data[0].number,
+        content: data[0].content
+    })
+    let removeRes = await foods.remove({
+        foodsid:ctx.request.body.data.id
+    })
+   console.log(removeRes,'删除foods')
+   console.log(downRes,'添加到downfoods')
+   if(removeRes && downRes){
+    ctx.body={
+        code:0,
+        msg:'下架成功'
+    }
+   }  
+})
+router.post('/upFoods', async ctx => {
+    //对已经下架的商品进行操作
+    console.log(ctx.request.body.data.id)
+    let data = await downfoods.find({
+        foodsid:ctx.request.body.data.id
+    })
+    console.log(data)
+    let downRes = await foods.create({
+        foodsid:data[0].foodsid,
+        foodsName: data[0].foodsName,
+        foodsPrice: data[0].foodsPrice,
+        foodsdescribe: data[0].foodsdescribe,
+        oldPrice: data[0].oldPrice,
+        foodsImgList: data[0].foodsImgList,
+        couponSelected: data[0].couponSelected,
+        number: data[0].number,
+        content: data[0].content
+    })
+    let removeRes = await downfoods.remove({
+        foodsid:ctx.request.body.data.id
+    })
+   console.log(removeRes,'删除downfoods')
+   console.log(downRes,'添加到foods')
+   if(removeRes && downRes){
+    ctx.body={
+        code:0,
+        msg:'上架成功'
+    }
+   }  
+})
+router.get('/getupFoodlist',async ctx=>{
+    //获取已经下架的表里面的商品
+    let start =parseInt(ctx.query.start) //这边可以改为接收参数后的计算
+    let pageSize = 10 //每一页显示的数据条数
+    let arr = []
+    let arrLength = await foods.find()
+    let res = await downfoods.find().skip(start).limit(pageSize).exec()
+        arr = res.map(item => {
+            return {
+                number: item.number,
+                foodsName: item.foodsName,
+                foodsPrice: item.foodsPrice,
+                foodsdescribe: item.foodsdescribe,
+                id:item.foodsid
+
+            }
+        })
+    let sa = arrLength.length/10
+    sa = Math.ceil(sa)
+    console.log(sa)
+    ctx.body= {
+        code:0,
+        data:arr,
+        num:sa
     }
 })
 router.get('/getCategory', async ctx => {
