@@ -174,6 +174,14 @@ router.get('/addFoods', async ctx => {
 })
 router.get('/getFoodsDetail', async ctx => {
     //获取商品详细信息的接口
+    let data = await foods.findOne({
+        foodsid:ctx.query.id
+    })
+    console.log(data)
+    ctx.body={
+        code:0,
+        data
+    }
 })
 router.get('/searchFoods',async ctx=>{
     //搜索商品,应该是模糊查询,后期在考虑模糊查询
