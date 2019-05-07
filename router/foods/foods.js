@@ -2,8 +2,20 @@ import Router from 'koa-router'
 import category from '../../model/foodscategory'
 import foods from '../../model/foods'
 import downfoods from '../../model/downFoods'
+import OSS from 'ali-oss'
+const client = new OSS({
+    accessKeyId: 'LTAIDaT373YHmkT',
+    accessKeySecret: 'ndTGswjQlWA2uz1m4Du3Drd73ULN13',
+    bucket: 'mycz',
+    endpoint:'oss-cn-shenzhen.aliyuncs.com'
+  });
+
 const router = new Router({
     prefix: "/foods"
+})
+router.get('/cs',async ctx=>{
+    let signUrl = client.signatureUrl('1557200651000560gif.png', {expires: 600, 'process' : 'image/resize,w_300'})
+  console.log(signUrl)
 })
 router.post('/upload', async ctx => {
     console.log(ctx)
@@ -22,7 +34,8 @@ router.get('/getFoodsList', async ctx => {
                 foodsName: item.foodsName,
                 foodsPrice: item.foodsPrice,
                 foodsdescribe: item.foodsdescribe,
-                id:item.foodsid
+                id:item.foodsid,
+                foodsImgList:item.foodsImgList
             }
         })
     let sa = arrLength.length/10
@@ -39,31 +52,68 @@ router.get('/addCategory', async ctx => {
     //分类id
     //分类名称
     //分类排列序号
+    console.log(ctx.query)
     let findName = await category.find({
         cateGoryName: ctx.query.name
     })
     let findId = await category.find({
         cateGoryId: ctx.query.id
     })
-    if (findName.length > 0 || findId > 0) {
+    console.log(findId,'findid')
+    if (findName.length > 0) {
         ctx.body = {
             code: -1,
             msg: "已经存在的分类.."
         }
-    } else {
-        let res = await category.create({
-            cateGoryId: ctx.query.id,
-            cateGoryName: ctx.query.name,
-            selectId: ctx.query.selectId
-           
-        })
-        if (res) {
+        return false
+    }else{
+        if(findId.length>0){
             ctx.body = {
-                code: 0,
-                msg: '添加分类成功'
+                code: -1,
+                msg: "已经存在的ID.."
+            }
+            return false
+        }
+        else{
+            let res = await category.create({
+                cateGoryId:ctx.query.id,
+                cateGoryName:ctx.query.name,
+                selectId:ctx.query.selectId,
+                categoryImg:ctx.query.categoryImg
+            })
+            if(res){
+                ctx.body={
+                    code:0,
+                    msg:'添加分类成功'
+                }
             }
         }
     }
+})
+router.get('/delCategory',async ctx=>{
+    //删除分类接口  
+     let foodsArray = await foods.find({
+        couponSelected:ctx.query.id
+     })
+     if(foodsArray.length>0){
+         ctx.body={
+             code:-1,
+             msg:'当前分类存在已经上架的商品不允许删除'
+         }
+     }
+     else
+     {
+        const id  = ctx.query.id
+        let res = await category.remove({
+           cateGoryId:id
+        })
+        if(res){
+            ctx.body={
+                code:0,
+                msg:'删除分类成功'
+            }
+        }
+     }
 })
 router.get('/categoryFoods',async ctx=>{
     //返回所属分类内容的接口，参数为分类id
@@ -124,7 +174,6 @@ router.get('/addFoods', async ctx => {
 })
 router.get('/getFoodsDetail', async ctx => {
     //获取商品详细信息的接口
-
 })
 router.get('/searchFoods',async ctx=>{
     //搜索商品,应该是模糊查询,后期在考虑模糊查询
@@ -223,12 +272,10 @@ router.get('/getupFoodlist',async ctx=>{
                 foodsPrice: item.foodsPrice,
                 foodsdescribe: item.foodsdescribe,
                 id:item.foodsid
-
             }
         })
     let sa = arrLength.length/10
     sa = Math.ceil(sa)
-    console.log(sa)
     ctx.body= {
         code:0,
         data:arr,
@@ -254,6 +301,6 @@ router.get('/getCategory', async ctx => {
 })
 router.get('/arrayFoods', async ctx => {
     //传入id获得,对应id的商品
-
+    
 })
 export default router
