@@ -136,6 +136,7 @@ router.get('/categoryFoods',async ctx=>{
        data:arr
    }
 })
+
 router.get('/addFoods', async ctx => {
     //增加商品的接
     //也需要进行验证,判断数据库中是否存在相同的内容
@@ -171,6 +172,33 @@ router.get('/addFoods', async ctx => {
             msg: '添加商品失败'
         }
     }
+})
+router.get('/editFoods', async ctx => {
+    let res = await foods.findOne({
+        foodsid:ctx.query.foodsid
+    })
+    let upRes = await foods.findByIdAndUpdate(res._id,{$set:{
+        foodsName: ctx.query.foodsName,
+        foodsPrice: ctx.query.price,
+        foodsdescribe: ctx.query.Specifications,
+        oldPrice: ctx.query.oldPrice,
+        foodsImgList: ctx.query['uploadImgList[]'],
+        couponSelected: ctx.query.couponSelected,
+        number: ctx.query.number,
+        content: ctx.query.content
+    }})
+    if(upRes){
+        ctx.body={
+            code:0,
+            msg:'编辑商品成功'
+        }
+    }else{
+        ctx.body = {
+            code:-1,
+            msg:'编辑商品失败,请重新提交'
+        }
+    }
+   
 })
 router.get('/getFoodsDetail', async ctx => {
     //获取商品详细信息的接口

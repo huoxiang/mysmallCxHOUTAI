@@ -1,5 +1,6 @@
 import Router from 'koa-router'
 import user from '../../model/user';
+import htuser from '../../model/htUser';
 import axios from 'axios'
 import Redis from 'koa-redis'
 const router = new Router({
@@ -39,10 +40,7 @@ router.post('/login', async ctx => {
       msg:'注册失败'
     }
   }
-
   //获取到信息后，将openID发放到前端
- 
- 
 })
 router.post('/setUserInfo',async ctx=>{
      console.log(ctx.request.body)
@@ -52,8 +50,6 @@ router.post('/setUserInfo',async ctx=>{
        code:0,
        msg:'请重试...'
     }
-    
-
 })
 router.post('/register', async ctx => {
   let {
@@ -88,7 +84,37 @@ router.post('/register', async ctx => {
     }
   }
 })
+router.post('/regis',async ctx=>{
+  //管理系统登陆注册操作接口
+  const {user,password,name} = ctx.request.body
+  console.log(user,password,name)
+ 
+  try {
+    let res = await htuser.create({
+      user,password,name
+    })
+    ctx.body={
+      code:0,
+      msg:'注册成功'
+    }
+  } catch(err){
+    ctx.body={
+      code:-1,
+      msg:'注册失败，当前用户已经存在'
+    }
+  }
+})
 router.post('/signup', async ctx => {
+  let {user,password} = ctx.request.body
+  console.log(user,password)
+  let res =  await htuser.findOne({
+     user
+  })
+  console.log(res)
+  ctx.body={
+    code:0,
+    data:res
+  }
   //   global.console.log('123')
   // let {username,password } = ctx.request.body
   //   //判断数据库是否存在该用户，不存在就提醒注册
