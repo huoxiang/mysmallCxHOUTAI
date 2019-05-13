@@ -15,7 +15,6 @@ const router = new Router({
 })
 router.get('/cs',async ctx=>{
     let signUrl = client.signatureUrl('1557200651000560gif.png', {expires: 600, 'process' : 'image/resize,w_300'})
-  console.log(signUrl)
 })
 router.post('/upload', async ctx => {
     console.log(ctx)
@@ -128,7 +127,8 @@ router.get('/categoryFoods',async ctx=>{
                 foodsName: item.foodsName,
                 foodsPrice: item.foodsPrice,
                 foodsdescribe: item.foodsdescribe,
-                id:item.foodsid
+                id:item.foodsid,
+                foodsImgList:item.foodsImgList
             }
         })
    ctx.body={
@@ -334,9 +334,5 @@ router.get('/getCategory', async ctx => {
         masg: '获取成功',
         data: arr
     }
-})
-router.get('/arrayFoods', async ctx => {
-    //传入id获得,对应id的商品
-    
 })
 export default router

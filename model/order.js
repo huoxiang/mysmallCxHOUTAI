@@ -18,6 +18,11 @@ const order = new Schema({
     },
     money:{
         type:Number
+    },
+    shops:{
+        //存放一次订单所有的商品，包括价格
+        //下单是将用户一次购买的商品id和数量发给后端，后端计算价格，前端不实际做价格处理
+        type:Array
     }
 })
 export default mongoose.model('order',order)

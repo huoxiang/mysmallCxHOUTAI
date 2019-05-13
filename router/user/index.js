@@ -19,27 +19,34 @@ router.post('/login', async ctx => {
     grant_type:'authorization_code'
    }
   })
+  
   //将用户的openid存入数据库
   // console.log(data.data,'data')
   // Store.hmset(`session_key:${data.data.openid}`,'session_key',data.data.session_key)
-  let newUser = await user.create({
-    openid:data.data.openid,
-    phone:""
+  try{
+    let newUser = await user.create({
+      openid:data.data.openid,
+      phone:""
+    })
     //后期获取用户号码在存入数据库，增加用户体验
-  })
-  if(newUser){
     ctx.body = {
       code:0,
+      openid:data.openid,
       msg:'注册成功'
     }
-  }
-  else
-  {
+  }catch(err){
+    let res = await user.findOne({
+      openid:data.data.openid
+    })
+    console.log(res)
     ctx.body={
       code:-1,
+      openid:res.openid,
       msg:'注册失败'
-    }
+    } 
   }
+ 
+  
   //获取到信息后，将openID发放到前端
 })
 router.post('/setUserInfo',async ctx=>{

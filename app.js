@@ -3,6 +3,7 @@ import cors from 'koa2-cors'
 import bodyparser from 'koa-bodyparser'
 import user from './router/user/index'
 import Foods from './router/foods/foods'
+import cart from './router/cart/cart'
 import auto from './router/autograph/aut'
 import mongoose from 'mongoose'
 import config from './config/config'
@@ -33,4 +34,5 @@ app.use(bodyparser())
 app.use(user.routes()).use(user.allowedMethods())
 app.use(Foods.routes()).use(Foods.allowedMethods())
 app.use(auto.routes()).use(auto.allowedMethods())
+app.use(cart.routes()).use(cart.allowedMethods())
 app.listen(8080)
