@@ -12,11 +12,35 @@ router.get('/addCarts',async ctx=>{
         openid:openId
     })
     if(oldCart){
-        console.log('已经存在购物车')
-        ctx.body={
-            code:0,
-            msg:"存在购物车"
+        //如果用户的购物车已经存在
+      
+        let c = oldCart.foodsList.map(item=>{
+             console.log(item)
+             if(item.foodsid==foodsId){
+                 console.log('已经存在')
+                 return {
+                     name:item.name,
+                     foodsPrice:item.foodsPrice,
+                     count:item.count+1,
+                     foodsid:item.foodsid 
+                    }
+             }
+        })
+        console.log(c)
+        oldCart.foodsList = c
+        console.log(oldCart,'修改过的购物车数据')
+        let res = await cart.findByIdAndUpdate(oldCart._id,{$set:{
+             foodsList:oldCart.foodsList,
+             openid:oldCart.openid,
+             createTime:oldCart.createTime
+        }})
+        if(res){
+            ctx.body={
+                code:0,
+                msg:"添加购物车成功"
+            }
         }
+       
     }
     else{
         console.log('不存在购物车')
@@ -29,6 +53,7 @@ router.get('/addCarts',async ctx=>{
             img:addfoods.foodsImgList[0],
             name:addfoods.foodsName,
             foodsPrice:addfoods.foodsPrice,
+            foodsid:addfoods.foodsid,
             count:1
         }
         arr.push(cartFoodsObj)
@@ -51,13 +76,6 @@ router.get('/addCarts',async ctx=>{
         }
        
     }
-    // console.log(foodsId)
-    // let res = await foods.find({
-    //     foodsid:foodsId
-    // })
-    // console.log(res)
-    //如果购物车表中不存在用户的购物车
-
 })
 router.get('/searchCart',async ctx=>{
     //获得用户购物车的接口

@@ -5,6 +5,7 @@ import user from './router/user/index'
 import Foods from './router/foods/foods'
 import cart from './router/cart/cart'
 import auto from './router/autograph/aut'
+import head from './router/head/head'
 import mongoose from 'mongoose'
 import config from './config/config'
 // import session from 'koa-generic-session'
@@ -35,4 +36,5 @@ app.use(user.routes()).use(user.allowedMethods())
 app.use(Foods.routes()).use(Foods.allowedMethods())
 app.use(auto.routes()).use(auto.allowedMethods())
 app.use(cart.routes()).use(cart.allowedMethods())
+app.use(head.routes()).use(head.allowedMethods())
 app.listen(8080)
