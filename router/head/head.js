@@ -54,7 +54,6 @@ router.get('/examineHead',async ctx=>{
                 msg:'此操作为通过该次申请'
             }
         }
-       
     }
 })
 router.get('/allHead',async ctx=>{

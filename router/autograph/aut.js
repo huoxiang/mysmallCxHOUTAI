@@ -4,6 +4,7 @@ import  aliOss  from '../../config/config'
 const router = new Router({
     prefix:'/auth'
 })
+
 router.post('/getAliSelect',async ctx=>{
      ctx.body = {
          code:0,
