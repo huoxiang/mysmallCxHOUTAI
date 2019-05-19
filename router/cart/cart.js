@@ -20,26 +20,8 @@ router.get('/addCarts', async ctx => {
         //如果用户的购物车已经存在
         //判断购物车列表中是否存在这个商品id
         let _Is; //使用这个值去做判断
-        // oldCart.foodsList.forEach((item,index)=>{
-        //     console.log(item)
-            
-        // })
-        // for(let i=0;i<oldCart.foodsList.length;i++){
-        //     console.log(oldCart.foodsList[i],'for循环')
-        //     if(oldCart.foodsList[i].foodsid==foodsId){
-        //         //设置_IS为真,//出现bug
-        //         _Is=true
-        //         break;
-
-        //     }
-        //     else{
-        //         _Is=false
-        //         break;
-        //     }
-        // }
-
+       
       let a=oldCart.foodsList.filter(item=>{
-            console.log(item)
             return item.foodsid==foodsId
         })
         console.log(a,'过滤出来的')
