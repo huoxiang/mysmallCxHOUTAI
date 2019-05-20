@@ -7,9 +7,9 @@ import cart from './router/cart/cart'
 import auto from './router/autograph/aut'
 import head from './router/head/head'
 import order from './router/order/order'
+import setCom from './router/setCom/setCom'
 import mongoose from 'mongoose'
 import config from './config/config'
-
 // import session from 'koa-generic-session'
 // import Redis from 'koa-redis'
 const app = new koa2()
@@ -40,5 +40,5 @@ app.use(auto.routes()).use(auto.allowedMethods())
 app.use(cart.routes()).use(cart.allowedMethods())
 app.use(head.routes()).use(head.allowedMethods())
 app.use(order.routes()).use(order.allowedMethods())
-
+app.use(setCom.routes()).use(setCom.allowedMethods())
 app.listen(8080)

@@ -6,10 +6,6 @@ const order = new Schema({
         //下单时选择团长的id
         type:String
     },
-    //下单了的订单表
-    asId:{
-        type:Number
-    },
     openId:{
         type:String
     },
@@ -27,6 +23,10 @@ const order = new Schema({
         //存放一次订单所有的商品，包括价格
         //下单是将用户一次购买的商品id和数量发给后端，后端计算价格，前端不实际做价格处理
         type:Array
+    },
+    orderStatus:{
+        type:Number
+        //顶单状态
     }
 })
 export default mongoose.model('order',order)
