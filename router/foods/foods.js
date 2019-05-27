@@ -39,7 +39,6 @@ router.get('/getFoodsList', async ctx => {
         })
     let sa = arrLength.length/10
     sa = Math.ceil(sa)
-    console.log(sa)
     ctx.body= {
         code:0,
         data:arr,
@@ -51,29 +50,29 @@ router.get('/addCategory', async ctx => {
     //分类id
     //分类名称
     //分类排列序号
-    console.log(ctx.query)
-    let findName = await category.find({
-        cateGoryName: ctx.query.name
-    })
-    let findId = await category.find({
-        cateGoryId: ctx.query.id
-    })
-    console.log(findId,'findid')
-    if (findName.length > 0) {
-        ctx.body = {
-            code: -1,
-            msg: "已经存在的分类.."
-        }
-        return false
-    }else{
-        if(findId.length>0){
-            ctx.body = {
-                code: -1,
-                msg: "已经存在的ID.."
-            }
-            return false
-        }
-        else{
+    // console.log(ctx.query)
+    // let findName = await category.find({
+    //     cateGoryName: ctx.query.name
+    // })
+    // let findId = await category.find({
+    //     cateGoryId: ctx.query.id
+    // })
+    // console.log(findId,'findid')
+    // if (findName.length > 0) {
+    //     ctx.body = {
+    //         code: -1,
+    //         msg: "已经存在的分类.."
+    //     }
+    //     return false
+    // }else{
+    //     if(findId.length>0){
+    //         ctx.body = {
+    //             code: -1,
+    //             msg: "已经存在的ID.."
+    //         }
+    //         return false
+    //     }
+    //     else{
             let res = await category.create({
                 cateGoryId:ctx.query.id,
                 cateGoryName:ctx.query.name,
@@ -86,8 +85,8 @@ router.get('/addCategory', async ctx => {
                     msg:'添加分类成功'
                 }
             }
-        }
-    }
+        // }
+    // }
 })
 router.get('/delCategory',async ctx=>{
     //删除分类接口  
@@ -127,7 +126,6 @@ router.get('/categoryFoods',async ctx=>{
                 foodsName: item.foodsName,
                 foodsPrice: item.foodsPrice,
                 foodsdescribe: item.foodsdescribe,
-                id:item.foodsid,
                 foodsImgList:item.foodsImgList
             }
         })

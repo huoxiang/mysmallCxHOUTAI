@@ -125,7 +125,6 @@ router.get('/addCarts', async ctx => {
                 msg: "不存在购物车"
             }
         }
-
     }
 })
 router.get('/removeCart',async ctx=>{
@@ -141,6 +140,7 @@ router.get('/removeCart',async ctx=>{
         if(item.foodsid!=foodsid){
            newArr.push(item)
         }
+
     })
     console.log(newArr)
     //已经删除了购物车中的商品
