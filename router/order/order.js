@@ -7,8 +7,27 @@ const router = new Router({
 router.get('/headerOrder',async ctx=>{
     const {headId} = ctx.query
     console.log(headId) 
+    //需要获得当前的时间
+    //时间计算到当前时间的凌晨0点
+    //减去两天的时间戳
+    //为一次团购的时间
+    let time = new Date()
+    let year = time.getFullYear()
+    let Month=time.getMonth()
+    let day=time.getDate()
+    let atime = new Date(`${year}-${Month+1}-${day} 00:00:00`)
+    let dayTime =1000*60*60*24*2
+    let tdtime = atime.getTime()
+    atime = atime - dayTime
+    //当前的时间戳
+    console.log(atime,'两天前')
+    console.log(tdtime,'今天')
     let res = await order.find({
-        headId
+        headId,
+        time:{
+            $lte:tdtime,
+            $gte:atime
+        }
     })
     //查询到团长这次的团购下单的订单
     if(res.length>0){
