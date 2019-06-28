@@ -17,7 +17,7 @@ router.get('/cs',async ctx=>{
     let signUrl = client.signatureUrl('1557200651000560gif.png', {expires: 600, 'process' : 'image/resize,w_300'})
 })
 router.post('/upload', async ctx => {
-    console.log(ctx)
+    //console.log(ctx)
 })
 router.get('/getFoodsList', async ctx => {
     //需要多少条数据，默认不传参数为前十条数据
@@ -26,7 +26,7 @@ router.get('/getFoodsList', async ctx => {
     let arr = []
     let arrLength = await foods.find()
     let res = await foods.find().skip(start).limit(pageSize).exec()
-    console.log(res)
+    //console.log(res)
         arr = res.map(item => {
             return {
                 number: item.number,
@@ -50,14 +50,14 @@ router.get('/addCategory', async ctx => {
     //分类id
     //分类名称
     //分类排列序号
-    // console.log(ctx.query)
+    // //console.log(ctx.query)
     // let findName = await category.find({
     //     cateGoryName: ctx.query.name
     // })
     // let findId = await category.find({
     //     cateGoryId: ctx.query.id
     // })
-    // console.log(findId,'findid')
+    // //console.log(findId,'findid')
     // if (findName.length > 0) {
     //     ctx.body = {
     //         code: -1,
@@ -118,7 +118,7 @@ router.get('/categoryFoods',async ctx=>{
     let res = await foods.find({
         couponSelected:ctx.query.couponSelected
     })
-   console.log(res)
+   //console.log(res)
    let arr = res.map(item => {
             return {
                 number: item.number,
@@ -203,7 +203,7 @@ router.get('/getFoodsDetail', async ctx => {
     let data = await foods.findOne({
         foodsid:ctx.query.id
     })
-    console.log(data)
+    //console.log(data)
     ctx.body={
         code:0,
         data
@@ -234,11 +234,11 @@ router.post('/downFoods', async ctx => {
     //下架商品,
     //上架商品一个表，下架商品一个表
     //删除的商品一个表
-    console.log(ctx.request.body.data.id)
+    //console.log(ctx.request.body.data.id)
     let data = await foods.find({
         foodsid:ctx.request.body.data.id
     })
-    console.log(data)
+    //console.log(data)
     let downRes = await downfoods.create({
         foodsid:data[0].foodsid,
         foodsName: data[0].foodsName,
@@ -253,8 +253,8 @@ router.post('/downFoods', async ctx => {
     let removeRes = await foods.remove({
         foodsid:ctx.request.body.data.id
     })
-   console.log(removeRes,'删除foods')
-   console.log(downRes,'添加到downfoods')
+   //console.log(removeRes,'删除foods')
+   //console.log(downRes,'添加到downfoods')
    if(removeRes && downRes){
     ctx.body={
         code:0,
@@ -264,11 +264,11 @@ router.post('/downFoods', async ctx => {
 })
 router.post('/upFoods', async ctx => {
     //对已经下架的商品进行操作
-    console.log(ctx.request.body.data.id)
+    //console.log(ctx.request.body.data.id)
     let data = await downfoods.find({
         foodsid:ctx.request.body.data.id
     })
-    console.log(data)
+    //console.log(data)
     let downRes = await foods.create({
         foodsid:data[0].foodsid,
         foodsName: data[0].foodsName,
@@ -283,8 +283,8 @@ router.post('/upFoods', async ctx => {
     let removeRes = await downfoods.remove({
         foodsid:ctx.request.body.data.id
     })
-   console.log(removeRes,'删除downfoods')
-   console.log(downRes,'添加到foods')
+   //console.log(removeRes,'删除downfoods')
+   //console.log(downRes,'添加到foods')
    if(removeRes && downRes){
     ctx.body={
         code:0,

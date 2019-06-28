@@ -12,7 +12,7 @@ router.get('/getNum',async ctx=>{
    }
 })
 router.post('/set',async ctx=>{
-    console.log('调用设置佣金比例的接口')
+    //console.log('调用设置佣金比例的接口')
     const {setNum} = ctx.request.body
     const findRes = await setCom.find()
     if(findRes.length>0){

@@ -3,23 +3,37 @@ import head from '../../model/Head'
 import order from '../../model/order'
 import Excel from 'exceljs'
 import send from 'koa-send'
-
+import Money from '../../model/Money'
 //实例化·E
 const router = new Router({
     prefix:'/head'
 })
+router.get('/addCount',async ctx=>{
+     Money.create({
+         openid:'oLUr9490d0Fgtubkodu8oZvTVC-g',
+         money:0
+         
+     })
+})
 router.get('/addHeader',async ctx=>{
-     console.log('123')
+     //console.log('123')
      const { phone,name,address,openid,longitude,latitude,city} = ctx.query
      let res = await head.create({
          phone,name,address,latitude,longitude,openid,city,status:0
      })
      if(res){
          //申请成功
-         ctx.body = {
-             code:0,
-             msg:`申请成功,等待审核`
-         }
+         let count  = Money.create({
+             openid,
+             money:0
+          })
+          if(count){
+            ctx.body = {
+                code:0,
+                msg:`申请成功,等待审核`
+            }
+          }
+         
      }
      else
      {
@@ -29,15 +43,22 @@ router.get('/addHeader',async ctx=>{
          }
      }
 })
+router.get('/download',async ctx=>{
+    const {name} = ctx.query
+    //下载文件
+    const xlsx =name
+    ctx.attachment(xlsx)
+    await send(ctx,xlsx,{root:__dirname+'../../../public'})
+})
 router.get('/examineHead',async ctx=>{
-    //审核团长的接口，传入参数status,还需传入openid,为2就T通过,为1就直接删除该条申请,
+    //审核团长的接口，传入参数status,还需传入openid,为2就通过,为1就直接删除该条申请,
     const {status,openid} = ctx.query
     let res = await head.findOne({
         openid
     })
-   // console.log(res)
+   // //console.log(res)
     let id = res._id
-    console.log(id)
+    //console.log(id)
     if(status==1){
         let removeRes = await head.remove({
             openid
@@ -54,6 +75,10 @@ router.get('/examineHead',async ctx=>{
            status:2
         }})
         if(result){
+         
+            const res = await Money.create({
+                     openid:openid
+            })
             ctx.body = {
                 code:0,
                 msg:'此操作为通过该次申请'
@@ -72,54 +97,58 @@ router.get('/allHead',async ctx=>{
      }
 })
 router.get('/exportExcel',async ctx=>{
-    let fills = {
-        solid: {type: "pattern", pattern:"solid", fgColor:{argb:"FFFFAAAA"}}
-    }
+    //查出订单
+    //接收一个团长id
+    const { openid } = ctx.query
+    let res = await head.findOne({
+          openid
+    })
     var workbook = new Excel.Workbook()
     var ws1 = workbook.addWorksheet("测试一");
+    ws1.addRow([`团长名字${res.name}`]);
+    ws1.mergeCells('A1:D1');
     ws1.addRow(["订单号","下单时间","订单金额","商品"]);
-    ws1.addRow(["总人口", "不可计数"]);
-    ws1.addRow(["类型", "动物", "非动物"]);
-    ws1.addRow(["统计日期", "1111-11-11 11:11:11"]);
-    ws1.addRow();
-    
-    //A6:E6
-    ws1.addRow(["你", "在", "说些", "神马", "呢？"]);
-    ws1.getCell("A6").fill = fills.solid;
-    ws1.getCell("B6").fill = fills.solid;
-    ws1.getCell("C6").fill = fills.solid;
-    ws1.getCell("D6").fill = fills.solid;
-    ws1.getCell("E6").fill = fills.solid;
-    
-    //7 - 13(A7:A13) - 7
-    ws1.addRow(["什么跟神马", 10, 1, "凡人修仙传", 7]);
-    ws1.addRow(["","","","一号遗迹", 2]);
-    ws1.addRow(["","","","六号遗迹", 0]);
-    ws1.addRow(["","","","古国一号", 0]);
-    ws1.addRow(["","","","锻体期", 0]);
-    ws1.addRow(["","","","合体期", 0]);
-    ws1.addRow(["","","","没资质", 1]);
-    
-    
-    ws1.mergeCells("A7:A13")
-    ws1.mergeCells("B7:B13")
-    ws1.mergeCells("C7:C13")
-    
-    //a6-e13 a b c d e
-    //ws1.getCell('A7').alignment = { vertical: 'middle', horizontal: 'center' };
-    
+    let data = await order.find()
+    data.map(item=>{ 
+        var arr = []
+        arr.push(item.orderId)
+        arr.push(item.time)
+        arr.push(item.money)
+        item.shops.map(i=>{
+            arr.push(`${i.name} 数量:${i.count}`)
+        })
+      ws1.addRow(arr)
+    })
+    var numObj = {}
+     data.map(item=>{
+      item.shops.map(i=>{
+          if(numObj[i.name]){
+              numObj[i.name]+=i.count
+          }
+          else{
+           numObj[i.name]=i.count
+          }
+      })
+    })
+    //console.log(numObj)
+    var cArr = []
+    Object.keys(numObj).forEach(item=>{
+        cArr.push(item+":"+numObj[item])
+    })
+    ws1.addRow(cArr)
     rowCenter(ws1, 6, 13);　
     colWidth(ws1, [1,2,3,4,5], 20);
-    
-    var ws2 = workbook.addWorksheet("测试二");
-    
-    
-    var ws3 = workbook.addWorksheet("测试三");
-    workbook.xlsx.writeFile('test2.xlsx')
-    .then(function(){
-        console.log('生成 xlsx');
-      send(ctx,'../../test2.xlsx')
-        });
+    const name = openid+new Date().getTime()
+    //console.log(name)
+    workbook.xlsx.writeFile(`public/${name}.xlsx`)
+    // .then(function(){
+    //     //console.log('生成 xlsx');
+    //   send(ctx,'../../test2.xlsx')
+    //     });
+    //response中返回下载文件的地址
+    ctx.body  = {
+        path:`${name}.xlsx`
+    }
 })
 router.get('/isHead',async ctx=>{
     //判断是否是团长
@@ -131,6 +160,7 @@ router.get('/isHead',async ctx=>{
         ctx.body = {
             code:0,
             msg:"用户是团长"
+            
         }
     }else{
         ctx.body = {
@@ -161,7 +191,7 @@ router.get('/searchHead',async ctx=>{
 router.get('/allsHead',async ctx=>{
     //此接口返回所有团长
     let res = await head.find({})
-    console.log(res)
+    //console.log(res)
     if(res.length>0){
         ctx.body={
             code:0,
@@ -173,7 +203,6 @@ router.get('/allsHead',async ctx=>{
             msg:"没有团长"
         }
     }
-  
 })
 router.get('/orderList',async ctx=>{
     //此接口和返回商品列表类似
@@ -184,7 +213,7 @@ router.get('/orderList',async ctx=>{
     let arr = []
     let arrLength = await order.find()
     let res = await order.find().skip(start).limit(pagesSize).exec()
-    console.log(res)
+    //console.log(res)
     let sa = arrLength.length/10
     sa=Math.ceil(sa)
     ctx.body={
@@ -205,23 +234,14 @@ router.get('/getoneHeadOrder',async ctx=>{
      let date = new Date()
      //获取当前的时间
      //转换时间戳
-     console.log(date)
+     //console.log(date)
      let time = date.getTime()
-     console.log(time)
+     //console.log(time)
 }) 
 function rowCenter(arg_ws, arg_start, arg_end) {
     for(let i = arg_start; i <= arg_end; i++) {
-        arg_ws.findRow(i).alignment = { vertical: 'middle', horizontal: 'center' };
+        // arg_ws.findRow(i).alignment = { vertical: 'middle', horizontal: 'center' };
         //循环 row 中的　cell，给每个 cell添加边框
-        arg_ws.findRow(i).eachCell(function (cell, index) {
-            cell.border = {
-                top: {style:'thin'},
-                left: {style:'thin'},
-                bottom: {style:'thin'},
-                right: {style:'thin'}
-            };
-        })
-
     }
 }
 

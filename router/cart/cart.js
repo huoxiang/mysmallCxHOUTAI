@@ -15,7 +15,7 @@ router.get('/addCarts', async ctx => {
     let oldCart = await cart.findOne({
         openid: openId
     })
-    console.log('商品id', foodsId)
+    //console.log('商品id', foodsId)
     if (oldCart) {
         //如果用户的购物车已经存在
         //判断购物车列表中是否存在这个商品id
@@ -24,9 +24,9 @@ router.get('/addCarts', async ctx => {
       let a=oldCart.foodsList.filter(item=>{
             return item.foodsid==foodsId
         })
-        console.log(a,'过滤出来的')
+        //console.log(a,'过滤出来的')
         a.length>0?_Is=true:_Is=false
-        console.log(_Is,'判断')
+        //console.log(_Is,'判断')
         //此处引入一个问题js中foreach和map是无法跳出循环的,所以这种时候要使用for循环
         if (_Is) {
             //如果存在这一个商品
@@ -49,9 +49,9 @@ router.get('/addCarts', async ctx => {
                     }
                 }
             })
-            console.log(c, '需要在本身添加')
+            //console.log(c, '需要在本身添加')
             oldCart.foodsList = c
-            console.log(oldCart.foodsList, '增加')
+            //console.log(oldCart.foodsList, '增加')
             let addCart = await cart.findByIdAndUpdate(oldCart._id, {
                 $set: {
                     foodsList: oldCart.foodsList,
@@ -67,7 +67,7 @@ router.get('/addCarts', async ctx => {
             }
         } else {
             //不存在的话，此物品将加入到购物车中
-            console.log('需要重新添加进入购物车')
+            //console.log('需要重新添加进入购物车')
             let resfood = await foods.findOne({
                 foodsid: foodsId
             })
@@ -94,8 +94,8 @@ router.get('/addCarts', async ctx => {
             }
         }
     } else {
-        console.log('不存在购物车')
-        console.log(new Date().getTime())
+        //console.log('不存在购物车')
+        //console.log(new Date().getTime())
         let arr = []
         let addfoods = await foods.findOne({
             foodsid: foodsId
@@ -108,7 +108,7 @@ router.get('/addCarts', async ctx => {
             count: 1
         }
         arr.push(cartFoodsObj)
-        console.log(arr)
+        //console.log(arr)
         let newCart = await cart.create({
             openid: openId,
             foodsList: arr,
@@ -134,7 +134,7 @@ router.get('/removeCart',async ctx=>{
     let oldCart = await cart.findOne({
         openid
     })
-    console.log(oldCart)
+    //console.log(oldCart)
     let newArr =[]
     oldCart.foodsList.map(item=>{
         if(item.foodsid!=foodsid){
@@ -142,7 +142,7 @@ router.get('/removeCart',async ctx=>{
         }
 
     })
-    console.log(newArr)
+    //console.log(newArr)
     //已经删除了购物车中的商品
     let saveNewCart = await cart.findByIdAndUpdate(oldCart._id,{$set:{
          foodsList:newArr,
@@ -165,7 +165,7 @@ router.get('/searchCart', async ctx => {
     let res = await cart.findOne({
         openid
     })
-    console.log(res)
+    //console.log(res)
     ctx.body = {
         code: 0,
         data: res
@@ -182,7 +182,7 @@ router.get('/getCartItemSum',async ctx=>{
         res.foodsList.map(item=>{
              add+=item.count
          })
-         console.log(add)
+         //console.log(add)
          ctx.body = {
              code:0,
              msg:"获取成功",

@@ -1,12 +1,13 @@
 import Router from 'koa-router'
 import order from '../../model/order'
 import cart from '../../model/cart'
+import foods from '../../model/foods';
 const router = new Router({
     prefix:'/order'
 })
 router.get('/headerOrder',async ctx=>{
     const {headId} = ctx.query
-    console.log(headId) 
+    ////console.log(headId) 
     //需要获得当前的时间
     //时间计算到当前时间的凌晨0点
     //减去两天的时间戳
@@ -20,8 +21,8 @@ router.get('/headerOrder',async ctx=>{
     let tdtime = atime.getTime()
     atime = atime - dayTime
     //当前的时间戳
-    console.log(atime,'两天前')
-    console.log(tdtime,'今天')
+    ////console.log(atime,'两天前')
+    ////console.log(tdtime,'今天')
     let res = await order.find({
         headId,
         time:{
@@ -107,7 +108,7 @@ router.get('/getDateSelect',async ctx=>{
    if(Month==5 || Month==1 || Month==7 || Month==8 || Month==1 || Month==10 || Month==12 ){
         day=31
    }
-   console.log(day,'当前月份天数')
+   ////console.log(day,'当前月份天数')
    let date1 = new Date(`${year}-${Month}-01 23:59:59`)//获取每个月的第一天
    let date2 = new Date(`${year}-${Month}-${day} 23:59:59`)
    let time1 = date1.getTime()
@@ -119,7 +120,7 @@ router.get('/getDateSelect',async ctx=>{
            $gte:time1
        }
    })
-   console.log(res)
+   ////console.log(res)
    if(res.length>0){
        ctx.body={
            code:0,
@@ -142,7 +143,7 @@ router.post('/createOrder',async ctx=>{
     })
     let newARR=[]//用来存放在购物车中找到的
     let carts= []
-    console.log(oldCart.foodsList,'做对比的数据')
+   
     for(let i=0;i<paylist.length;i++){
       oldCart.foodsList.map((item,index)=>{
         if(item.foodsid==paylist[i]) {
@@ -163,10 +164,22 @@ router.post('/createOrder',async ctx=>{
           //选取了购物车的数据
           let sum=0
           //设置价格
-          newARR.map((item,index)=>{
+          newARR.map(async (item,index)=>{
+              
+            let res  =await foods.findOne({  foodsid:item.foodsid })
+            ////console.log(res,'原数据')
+            ////console.log(item.count,'需要减少的库存')
+            let updatefoods = await foods.findByIdAndUpdate(res._id,{
+                $set:{
+                    number:res.number-item.count
+                }
+            })
+            if(updatefoods){
+                ////console.log('修改成功')
+            }
               sum+=item.foodsPrice*item.count
           })
-         console.log(sum)
+         ////console.log(sum)
          let createOrder = await order.create({
             headId:headerid,
             time:new Date().getTime(),
@@ -180,9 +193,9 @@ router.post('/createOrder',async ctx=>{
              // 创建成功后，需要删除用户购物车中的数据
              // 从oldCart中删除数据并保存
              if(carts.length>0){
-                 console.log(carts,'未提交的商品')
+                 ////console.log(carts,'未提交的商品')
                  oldCart.foodsList = carts
-                 console.log(oldCart,'未提交的json')
+                 ////console.log(oldCart,'未提交的json')
                  let saveMcart = await cart.findByIdAndUpdate(oldCart._id,{
                      $set:{
                        foodsList:oldCart.foodsList,
@@ -192,12 +205,12 @@ router.post('/createOrder',async ctx=>{
                  })
                  if(saveMcart){
                      //保存修改的购物车
-                     console.log('1245')
+                     ////console.log('1245')
                  }
              }else
              {
-                 console.log('此次购物车已经全部提交');
-                 console.log(oldCart);
+                 ////console.log('此次购物车已经全部提交');
+                 ////console.log(oldCart);
                  let removeCart=await cart.findOneAndRemove({
                      _id:oldCart._id
                  })

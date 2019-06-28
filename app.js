@@ -10,6 +10,8 @@ import order from './router/order/order'
 import setCom from './router/setCom/setCom'
 import mongoose from 'mongoose'
 import config from './config/config'
+import path from 'path'
+import server from 'koa-static'//搭建静态资源服务,方便下载订单导出的表格
 // import session from 'koa-generic-session'
 // import Redis from 'koa-redis'
 const app = new koa2()
@@ -20,19 +22,15 @@ app.proxy=true
 //     prefix:'mt:uid',
 //     store:new Redis()
 // }))
-app.use(cors({
-    origin:ctx=>{
-        return "*"//允许所有域名跨域
-    },
-    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
-    maxAge: 5,
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'DELETE'],
-    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
-}))
+const staticPath = './public'
+const home = server(
+   path.join(__dirname,staticPath)
+   )
+app.use(cors())
 mongoose.connect(config.dbs,{
     useNewUrlParser:true
 })
+app.use(home)
 app.use(bodyparser())
 app.use(user.routes()).use(user.allowedMethods())
 app.use(Foods.routes()).use(Foods.allowedMethods())
